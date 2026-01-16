@@ -15,6 +15,14 @@
       "types": "./dist/db/database.d.ts",
       "default": "./dist/db/database.js"
     },
+    "./db/database": {
+      "types": "./dist/db/database.d.ts",
+      "default": "./dist/db/database.js"
+    },
+    "./drizzle-schema": {
+      "types": "./dist/drizzle-out/schema.d.ts",
+      "default": "./dist/drizzle-out/schema.js"
+    },
     "./queries/*": {
       "types": "./dist/queries/*.d.ts",
       "default": "./dist/queries/*.js"

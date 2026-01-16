@@ -1,3 +1,5 @@
+import { initDatabase } from "@repo/data-ops/db/database";
+
 export async function createContext({
   req,
   env,
@@ -7,6 +9,9 @@ export async function createContext({
   env: ServiceBindings;
   workerCtx: ExecutionContext;
 }) {
+  // Initialize database connection
+  initDatabase(env.DB);
+
   return {
     req,
     env,

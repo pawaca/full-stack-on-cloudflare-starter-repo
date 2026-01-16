@@ -79,7 +79,18 @@ function RouteComponent() {
 
     columnHelper.accessor("destinations", {
       header: "Destination Links",
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        const value = info.getValue();
+        // Handle both number (count) and object (destinations map) formats
+        if (typeof value === "number") {
+          return `${value} destinations`;
+        }
+        if (typeof value === "object" && value !== null) {
+          const count = Object.keys(value).length;
+          return `${count} destination${count !== 1 ? "s" : ""}`;
+        }
+        return "0 destinations";
+      },
     }),
   ];
 

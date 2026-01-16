@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Edit3, Check } from "lucide-react";
 import { DestinationsSchemaType } from "@repo/data-ops/zod-schema/links";
 import { trpc } from "@/router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface DefaultUrlEditorProps {
   destinations: DestinationsSchemaType;
@@ -24,15 +25,25 @@ export function DefaultUrlEditor({
 }: DefaultUrlEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [url, setUrl] = useState(destinations.default);
+  const queryClient = useQueryClient();
 
   const updateDestinationMutation = useMutation(
     trpc.links.updateLinkDestinations.mutationOptions({
-      onSettled: () => {},
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.links.getLink.queryKey({ linkId }),
+        });
+        toast.success("Default URL updated successfully");
+      },
+      onError: () => {
+        toast.error("Failed to update default URL");
+      },
     }),
   );
 
   const handleSave = () => {
     setIsEditing(false);
+    console.log("Saving default URL...");
     updateDestinationMutation.mutate({
       linkId,
       destinations: {
@@ -41,7 +52,6 @@ export function DefaultUrlEditor({
       },
     });
     onSave?.(url);
-    console.log("Saving default URL...");
   };
 
   return (

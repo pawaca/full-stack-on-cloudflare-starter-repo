@@ -9,8 +9,10 @@ import { TRPCError } from "@trpc/server";
 import {
   ACTIVE_LINKS_LAST_HOUR,
   LAST_30_DAYS_BY_COUNTRY,
-  LINK_LIST,
 } from "./dummy-data";
+import { getDb } from "@repo/data-ops/database";
+import { links } from "@repo/data-ops/drizzle-schema";
+import { eq } from "drizzle-orm";
 
 export const linksTrpcRoutes = t.router({
   linkList: t.procedure
@@ -20,7 +22,12 @@ export const linksTrpcRoutes = t.router({
       }),
     )
     .query(async ({}) => {
-      return LINK_LIST;
+      const db = getDb();
+      const result = await db.select().from(links);
+      return result.map((link) => ({
+        ...link,
+        destinations: JSON.parse(link.destinations),
+      }));
     }),
   createLink: t.procedure.input(createLinkSchema).mutation(async ({}) => {
     return "random-id";
@@ -33,7 +40,11 @@ export const linksTrpcRoutes = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log(input.linkId, input.name);
+      const db = getDb();
+      await db
+        .update(links)
+        .set({ name: input.name, updated: new Date().toISOString() })
+        .where(eq(links.linkId, input.linkId));
     }),
   getLink: t.procedure
     .input(
@@ -41,21 +52,21 @@ export const linksTrpcRoutes = t.router({
         linkId: z.string(),
       }),
     )
-    .query(async ({}) => {
-      const data = {
-        name: "My Sample Link",
-        linkId: "link_123456789",
-        accountId: "user_987654321",
-        destinations: {
-          default: "https://example.com",
-          mobile: "https://mobile.example.com",
-          desktop: "https://desktop.example.com",
-        },
-        created: "2024-01-15T10:30:00Z",
-        updated: "2024-01-20T14:45:00Z",
+    .query(async ({ input }) => {
+      const db = getDb();
+      const result = await db
+        .select()
+        .from(links)
+        .where(eq(links.linkId, input.linkId))
+        .limit(1);
+
+      if (!result.length) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const link = result[0];
+      return {
+        ...link,
+        destinations: JSON.parse(link.destinations),
       };
-      if (!data) throw new TRPCError({ code: "NOT_FOUND" });
-      return data;
     }),
   updateLinkDestinations: t.procedure
     .input(
@@ -65,7 +76,16 @@ export const linksTrpcRoutes = t.router({
       }),
     )
     .mutation(async ({ input }) => {
-      console.log(input.linkId, input.destinations);
+      const db = getDb();
+      await db
+        .update(links)
+        .set({
+          destinations: JSON.stringify(input.destinations),
+          updated: new Date().toISOString(),
+        })
+        .where(eq(links.linkId, input.linkId));
+
+      return { success: true };
     }),
   activeLinks: t.procedure.query(async () => {
     return ACTIVE_LINKS_LAST_HOUR;
