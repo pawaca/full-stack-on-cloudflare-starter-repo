@@ -4,7 +4,7 @@
   "description": "Helper methods to interface with data",
   "scripts": {
     "build": "tsc -p tsconfig.json --outDir ./dist && tsc-alias",
-    "pull": "drizzle-kit pull --config drizzle.config.ts",
+    "pull": "NODE_OPTIONS='-r global-agent/bootstrap' drizzle-kit pull --config drizzle.config.ts",
     "migrate": "drizzle-kit migrate --config drizzle.config.ts",
     "generate": "drizzle-kit generate --config drizzle.config.ts",
     "studio": "drizzle-kit studio --config drizzle.config.ts",
@@ -51,6 +51,7 @@
     "@cloudflare/workers-types": "^4.20250405.0",
     "@types/node": "^22.15.19",
     "drizzle-kit": "^0.31.1",
+    "global-agent": "^3.0.0",
     "tsc-alias": "^1.8.16",
     "wrangler": "^4.22.0"
   }
