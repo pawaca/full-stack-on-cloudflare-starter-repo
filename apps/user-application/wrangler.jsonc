@@ -14,4 +14,11 @@
   "observability": {
     "enabled": true,
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fullstack-test",
+      "database_id": "4133faf9-343a-4ed0-8f83-1550cd0ab04f",
+    },
+  ],
 }
