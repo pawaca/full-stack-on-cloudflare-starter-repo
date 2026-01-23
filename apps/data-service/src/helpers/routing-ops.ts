@@ -1,4 +1,5 @@
 import type { LinkSchemaType } from '@repo/data-ops/zod-schema/links';
+import { getLinkById } from '@repo/data-ops/queries/links';
 
 // 缓存 TTL（秒）
 const CACHE_TTL_SECONDS = 3600; // 1 小时
@@ -28,33 +29,12 @@ export async function getLinkInfoFromKV(
 		// 缓存读取失败，继续查询数据库
 	}
 
-	// Step 2: 缓存未命中，回源数据库查询
-	const result = await db
-		.prepare(
-			'SELECT link_id, account_id, name, destinations, created, updated FROM links WHERE link_id = ?'
-		)
-		.bind(linkId)
-		.first<{
-			link_id: string;
-			account_id: string;
-			name: string;
-			destinations: string;
-			created: string;
-			updated: string;
-		}>();
+	// Step 2: 缓存未命中，调用 data-ops 回源数据库查询
+	const linkInfo = await getLinkById(db, linkId);
 
-	if (!result) {
+	if (!linkInfo) {
 		return null;
 	}
-
-	const linkInfo: LinkSchemaType = {
-		linkId: result.link_id,
-		accountId: result.account_id,
-		name: result.name,
-		destinations: JSON.parse(result.destinations),
-		created: result.created,
-		updated: result.updated,
-	};
 
 	// Step 3: 回写缓存，设置 TTL
 	try {

@@ -65,6 +65,39 @@ export async function getLink(params: { linkId: string; accountId: string }) {
   };
 }
 
+/**
+ * 通过 linkId 获取链接信息（不需要 accountId）
+ * 用于公开的链接重定向场景
+ */
+export async function getLinkById(db: D1Database, linkId: string) {
+  const result = await db
+    .prepare(
+      "SELECT link_id, account_id, name, destinations, created, updated FROM links WHERE link_id = ?"
+    )
+    .bind(linkId)
+    .first<{
+      link_id: string;
+      account_id: string;
+      name: string;
+      destinations: string;
+      created: string;
+      updated: string;
+    }>();
+
+  if (!result) {
+    return null;
+  }
+
+  return {
+    linkId: result.link_id,
+    accountId: result.account_id,
+    name: result.name,
+    destinations: JSON.parse(result.destinations) as DestinationsSchemaType,
+    created: result.created,
+    updated: result.updated,
+  };
+}
+
 export async function updateLinkDestinations(params: {
   linkId: string;
   accountId: string;
