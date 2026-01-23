@@ -11,4 +11,21 @@
 	"observability": {
 		"enabled": true,
 	},
+	// 任务 3.1: D1 数据库绑定
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "data-service-db",
+			"database_id": "4133faf9-343a-4ed0-8f83-1550cd0ab04f",
+			"remote": true
+		}
+	],
+	// 任务 4.1: KV 命名空间绑定
+	"kv_namespaces": [
+		{
+			"binding": "LINK_CACHE",
+			"id": "9e1944e821b74df3991099851ba326d1",
+			"preview_id": "423676100be84ac9b5194505d66898d5"
+		}
+	]
 }
